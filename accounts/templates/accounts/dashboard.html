@@ -14,14 +14,14 @@
             </a>
             <table class="table table-sm">
                 <tr>
-
+                    <th></th>
                     <th>Customer</th>
                     <th>Phone</th>
                 </tr>
 
                 {% for customer in customers %}
                     <tr>
-
+                        <th><a href="{% url 'customer' customer.id %}">Details</a> </th>
                         <th>{{customer.name}}</th>
                         <th>{{customer.phone}}</th>
                     </tr>
