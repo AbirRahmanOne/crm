@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import *
-
+from django.forms import inlineformset_factory
 from .forms import *
 
 
@@ -34,15 +34,17 @@ def products(request):
     return render(request, 'accounts/products.html', {'products': products})
 
 
-def createOrder(request):
-    form = OrderForm()
+def createOrder(request, pk):
+    OrderFormSet = inlineformset_factory(Customer, Order, fields=('product', 'status'), extra=5)
+    customer = Customer.objects.get(id=pk)
+    formset = OrderFormSet(queryset=Order.objects.none(), instance=customer)
     if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            form.save()
+        formset = OrderFormSet(request.POST, instance=customer)
+        if formset.is_valid():
+            formset.save()
             return redirect('/')
 
-    context = {'form': form}
+    context = {'form': formset}
     return render(request, 'accounts/order_form.html', context)
 
 
@@ -58,10 +60,25 @@ def updateOrder(request, pk):
     context = {'form': form}
     return render(request, 'accounts/order_form.html', context)
 
+
 def deleteOrder(request, pk):
     item = Order.objects.get(id=pk)
     if request.method == 'POST':
         item.delete()
         return redirect('/')
+
     context = {'item': item}
     return render(request, 'accounts/delete.html', context)
+
+
+def updateCustomer(request, pk):
+    customer = Customer.objects.get(id=pk)
+    form = CustomerForm(instance=customer)
+
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+    context = {'form': form}
+    return render(request, 'accounts/update_customer.html', context)
